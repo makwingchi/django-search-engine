@@ -15,6 +15,7 @@ This is a web search engine project built mainly with Elasticsearch and the Djan
 - `Django`
 - `Elasticsearch`
 - `Kibana`
+- `Redis`
 - `Javascript`
 - `HTML/CSS`
 
