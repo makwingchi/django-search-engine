@@ -23,7 +23,7 @@ Search Suggestions
 ![demo](/Demo/suggest.PNG)
 
 
-Most frequently and most recent research terms
+Most frequent and most recent search terms
 ![demo](/Demo/popular_and_recent_searches.PNG)
 
 
