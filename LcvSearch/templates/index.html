@@ -1,0 +1,161 @@
+<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% load staticfiles %}
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Search Engine</title>
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../static/css/index.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="main">
+        <h1 class="title">
+            <div class="logo large"></div>
+        </h1>
+        <div class="inputArea">
+            <input type="text" class="searchInput" />
+            <input type="button", onclick="add_search()" class="searchButton" />
+            <ul class="dataList">
+                <li>A</li>
+                <li>B</li>
+                <li>C</li>
+                <li>D</li>
+                <li>E</li>
+            </ul>
+        </div>
+
+        <div class="historyArea">
+            <p class="history">
+                <label>Popular：</label>
+                {% for search_words in topn_search %}
+                    <a href="/search?q={{ search_words }}">{{ search_words }}</a>
+                {% endfor %}
+            </p>
+            <p class="history mysearch">
+                <label>Recent：</label>
+                <span class="all-search">
+                    <a href="javascript:;">A</a>
+                    <a href="javascript:;">B</a>
+                    <a href="javascript:;">C</a>
+                    <a href="javascript:;">D</a>
+                </span>
+
+            </p>
+        </div>
+    </div><!-- End of main -->
+</body>
+
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/global.js' %}"></script>
+<script type="text/javascript">
+    var suggest_url = "{% url "suggest" %}"
+    var search_url = "{% url "search" %}"
+
+
+	$('.searchList').on('click', '.searchItem', function(){
+		$('.searchList .searchItem').removeClass('current');
+		$(this).addClass('current');
+	});
+
+    function removeByValue(arr, val) {
+      for(var i=0; i<arr.length; i++) {
+        if(arr[i] == val) {
+          arr.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+
+    // Search suggestions
+    $(function(){
+        $('.searchInput').bind(' input propertychange ',function(){
+            var searchText = $(this).val();
+            var tmpHtml = ""
+            $.ajax({
+                cache: false,
+                type: 'get',
+                dataType:'json',
+                url:suggest_url+"?s="+searchText+"&s_type="+$(".searchItem.current").attr('data-type'),
+                async: true,
+                success: function(data) {
+                    console.log(data)
+                    for (var i=0;i<data.length;i++){
+                        tmpHtml += '<li><a href="'+search_url+'?q='+data[i]+'">'+data[i]+'</a></li>'
+                    }
+                    $(".dataList").html("")
+                    $(".dataList").append(tmpHtml);
+                    if (data.length == 0){
+                        $('.dataList').hide()
+                    }else {
+                        $('.dataList').show()
+                    }
+                }
+            });
+        } );
+    })
+
+    hideElement($('.dataList'), $('.searchInput'));
+
+</script>
+<script>
+    var searchArr;
+    // whether there is search history stored in browser
+    if(localStorage.search){
+    // if so, save to searchArr
+        searchArr= localStorage.search.split(",")
+    }else{
+    //  if not, searchArr will be an empty array
+        searchArr = [];
+    }
+    // Search history will be what have been saved
+    MapSearchArr();
+
+    function add_search(){
+        var val = $(".searchInput").val();
+        if (val.length>=2){
+            // when click the search button -> remove duplicates
+            KillRepeat(val);
+            // Restore searchArr to localStorage
+            localStorage.search = searchArr;
+            // Show search content
+            MapSearchArr();
+        }
+
+        window.location.href=search_url+'?q='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+
+    }
+
+    function MapSearchArr(){
+        var tmpHtml = "";
+        var arrLen = 0
+        if (searchArr.length >= 5){
+            arrLen = 5
+        }else {
+            arrLen = searchArr.length
+        }
+        for (var i=0;i<arrLen;i++){
+            tmpHtml += '<a href="'+search_url+'?q='+searchArr[i]+'">'+searchArr[i]+'</a>'
+        }
+        $(".mysearch .all-search").html(tmpHtml);
+    }
+    // remove duplicates
+    function KillRepeat(val){
+        var kill = 0;
+        for (var i=0;i<searchArr.length;i++){
+            if(val===searchArr[i]){
+                kill ++;
+            }
+        }
+        if(kill<1){
+            searchArr.unshift(val);
+        }else {
+            removeByValue(searchArr, val)
+            searchArr.unshift(val)
+        }
+    }
+</script>
+</html>

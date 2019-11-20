@@ -1,0 +1,253 @@
+<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% load staticfiles %}
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Search Engine</title>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <div id="hd" class="ue-clear">
+            <a href="/"><div class="logo"></div></a>
+            <div class="inputArea">
+                <input type="text" class="searchInput" value="{{ key_words }}"/>
+                <input type="button" class="searchButton" onclick="add_search()"/>
+            </div>
+        </div>
+        <div id="bd" class="ue-clear">
+            <div id="main">
+                <div class="sideBar">
+
+                    <div class="subfield">Websites</div>
+                    <ul class="subfieldContext">
+                        <li>
+                            <span class="name">Amazon</span>
+                            <span class="unit">({{ amazon }})</span>
+                        </li>
+                        <li>
+                            <span class="name">TechCrunch</span>
+                            <span class="unit">({{ techcrunch }})</span>
+                        </li>
+                        <li>
+                            <span class="name">Zhihu</span>
+                            <span class="unit">({{ zhihu }})</span>
+                        </li>
+                        <li class="more">
+                            <a href="javascript:;">
+                                <span class="text">More</span>
+                                <i class="moreIcon"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+
+                    <div class="sideBarShowHide">
+                        <a href="javascript:;" class="icon"></a>
+                    </div>
+                </div>
+                <div class="resultArea">
+                    <p class="resultTotal">
+                        <span class="info">About&nbsp;<span class="totalResult">{{ total_nums }}</span>&nbsp;Results (<span class="time">{{ last_seconds }}</span> seconds), <span class="totalPage">{{ page_nums }}</span> pages in total</span>
+                    </p>
+                    <div class="resultList"  style="float: left">
+                        {% for hit in all_hits %}
+                        <div class="resultItem">
+                                <div class="itemHead">
+                                    <a href="{{ hit.url }}"  target="_blank" class="title">{% autoescape off %}{{ hit.title }}{% endautoescape %}</a>
+                                    <span class="divsion">-</span>
+                                    <span class="fileType">
+                                        <span class="label">Source：</span>
+                                        <span class="value">{{ hit.source }}</span>
+                                    </span>
+                                    <span class="dependValue">
+                                        <span class="label">Score：</span>
+                                        <span class="value">{{ hit.score }}</span>
+                                    </span>
+                                </div>
+                                <div class="itemBody">
+                                    {% autoescape off %}{{ hit.content }}{% endautoescape %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination ue-clear"></div>
+                    <!-- Relevant search -->
+
+                </div>
+                <div class="historyArea">
+                    <div class="hotSearch">
+                        <h6>Popular</h6>
+                        <ul class="historyList">
+                            {% for search_word in topn_search %}
+                                <li><a href="/search?q={{ search_word }}">{{ search_word }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="mySearch">
+                        <h6>Recent</h6>
+                        <ul class="historyList">
+
+                        </ul>
+                    </div>
+                </div>
+            </div><!-- End of main -->
+        </div><!--End of bd-->
+    </div>
+</body>
+
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/global.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
+<script type="text/javascript">
+    var search_url = "{% url 'search' %}"
+
+	$('.searchList').on('click', '.searchItem', function(){
+		$('.searchList .searchItem').removeClass('current');
+		$(this).addClass('current');	
+	});
+	
+	$.each($('.subfieldContext'), function(i, item){
+		$(this).find('li:gt(2)').hide().end().find('li:last').show();		
+	});
+
+	function removeByValue(arr, val) {
+      for(var i=0; i<arr.length; i++) {
+        if(arr[i] == val) {
+          arr.splice(i, 1);
+          break;
+        }
+      }
+    }
+	$('.subfieldContext .more').click(function(e){
+		var $more = $(this).parent('.subfieldContext').find('.more');
+		if($more.hasClass('show')){
+			
+			if($(this).hasClass('define')){
+				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('Customize');
+			}else{
+				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('More');
+			}
+			$(this).parent('.subfieldContext').find('li:gt(2)').hide().end().find('li:last').show();
+	    }else{
+			$(this).parent('.subfieldContext').find('.more').addClass('show').find('.text').text('Collapse');
+			$(this).parent('.subfieldContext').find('li:gt(2)').show();	
+		}
+		
+	});
+	
+	$('.sideBarShowHide a').click(function(e) {
+		if($('#main').hasClass('sideBarHide')){
+			$('#main').removeClass('sideBarHide');
+			$('#container').removeClass('sideBarHide');
+		}else{
+			$('#main').addClass('sideBarHide');	
+			$('#container').addClass('sideBarHide');
+		}
+        
+    });
+	var key_words = "{{key_words}}"
+	// Pagination
+	$(".pagination").pagination({{ total_nums }}, {
+		current_page :{{ page|add:'-1' }}, // Current page
+		items_per_page :10,
+		display_msg :true,
+		callback :pageselectCallback
+	});
+	function pageselectCallback(page_id, jq) {
+		window.location.href=search_url+'?q='+key_words+'&p='+(page_id+1)
+	}
+	
+	setHeight();
+	$(window).resize(function(){
+		setHeight();	
+	});
+	
+	function setHeight(){
+		if($('#container').outerHeight() < $(window).height()){
+			$('#container').height($(window).height()-33);
+		}	
+	}
+</script>
+<script type="text/javascript">
+    $('.searchList').on('click', '.searchItem', function(){
+        $('.searchList .searchItem').removeClass('current');
+        $(this).addClass('current');
+    });
+
+    // when focus -> show datalist
+    $('.searchInput').on('focus', function(){
+        $('.dataList').show()
+    });
+
+    // when click
+    $('.dataList').on('click', 'li', function(){
+        var text = $(this).text();
+        $('.searchInput').val(text);
+        $('.dataList').hide()
+    });
+
+    hideElement($('.dataList'), $('.searchInput'));
+</script>
+<script>
+    var searchArr;
+    // whether there is search history stored in browser
+    if(localStorage.search){
+        // if so, save to searchArr
+        searchArr= localStorage.search.split(",")
+    }else{
+        // if not, searchArr will be an empty array
+        searchArr = [];
+    }
+    // Search history will be what have been saved
+    MapSearchArr();
+
+    function add_search(){
+        var val = $(".searchInput").val();
+        if (val.length>=2){
+            // when click the search button -> remove duplicates
+            KillRepeat(val);
+            // Restore searchArr to localStorage
+            localStorage.search = searchArr;
+            // Show search content
+            MapSearchArr();
+        }
+
+        window.location.href=search_url+'?q='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+
+    }
+
+    function MapSearchArr(){
+        var tmpHtml = "";
+        var arrLen = 0
+        if (searchArr.length > 6){
+            arrLen = 6
+        }else {
+            arrLen = searchArr.length
+        }
+        for (var i=0;i<arrLen;i++){
+            tmpHtml += '<li><a href="/search?q='+searchArr[i]+'">'+searchArr[i]+'</a></li>'
+        }
+        $(".mySearch .historyList").append(tmpHtml);
+    }
+    // remove duplicates
+    function KillRepeat(val){
+        var kill = 0;
+        for (var i=0;i<searchArr.length;i++){
+            if(val===searchArr[i]){
+                kill ++;
+            }
+        }
+        if(kill<1){
+            searchArr.unshift(val);
+        }else {
+            removeByValue(searchArr, val)
+            searchArr.unshift(val)
+        }
+    }
+</script>
+</html>
