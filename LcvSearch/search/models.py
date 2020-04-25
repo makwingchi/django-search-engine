@@ -36,13 +36,6 @@ class TechcrunchType(DocType):
         doc_type = "techcrunch"
 
 
-class ZhihuType(DocType):
-    class Meta:
-        index = "data"
-        doc_type = "zhihu"
-
-
 if __name__ == "__main__":
     AmazonType.init()
     TechcrunchType.init()
-    ZhihuType.init()

@@ -4,21 +4,24 @@ from urllib import parse
 
 import scrapy
 from scrapy.loader import ItemLoader
+from scrapy_redis.spiders import RedisSpider
+
 
 from ArticleSpider.items import AmazonItem
 
 
-class AmazonSpider(scrapy.Spider):
+class AmazonSpider(RedisSpider):
     name = 'amazon'
     allowed_domains = ['amazon.com']
-    terms = ["laptop", "desktop", "computer", "lenovo", "apple", "dell",
-             "samsung", "sony", "huawei", "phone", "camera", "tv", "mobile+phone",
-             "router", "projector", "headset", "computer+mouse", "keyboard",
-             "speaker", "clock", "remote", "alexa", "cable", "earbud", "kindle",
-             "wifi", "ring", "tablet", "wireless", "monitors", "adapter",
-             "repeater", "adapter", "modem", "access+point", "hard+drive",
-             "memory+card", "webcam", "processor"]
-    start_urls = ['https://www.amazon.com/{0}/s?k={0}&page=1'.format(term) for term in terms]
+    redis_key = "amazon:start_urls"
+    # terms = ["laptop", "desktop", "computer", "lenovo", "apple", "dell",
+    #          "samsung", "sony", "huawei", "phone", "camera", "tv", "mobile+phone",
+    #          "router", "projector", "headset", "computer+mouse", "keyboard",
+    #          "speaker", "clock", "remote", "alexa", "cable", "earbud", "kindle",
+    #          "wifi", "ring", "tablet", "wireless", "monitors", "adapter",
+    #          "repeater", "adapter", "modem", "access+point", "hard+drive",
+    #          "memory+card", "webcam", "processor"]
+    # start_urls = ['https://www.amazon.com/{0}/s?k={0}&page=1'.format(term) for term in terms]
 
     # start_urls = ['https://www.amazon.com']
 

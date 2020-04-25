@@ -6,10 +6,9 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 import random
-from scrapy import signals
 
 from ArticleSpider.settings import RANDOM_UA_TYPE
-from tools.crawl_xici_ip import GetIP
+from scrapy import signals
 
 
 class ArticlespiderSpiderMiddleware(object):

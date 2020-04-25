@@ -19,6 +19,7 @@ class ArticlespiderPipeline(object):
     def process_item(self, item, spider):
         return item
 
+
 class MysqlPipeline(object):
     def __init__(self):
         self.conn = MySQLdb.connect("127.0.0.1", "root", "123456", "article_spider", charset="utf8", use_unicode=True)
@@ -26,7 +27,8 @@ class MysqlPipeline(object):
 
     def process_item(self, item, spider):
         insert_sql = """
-            insert into jobbole_article(title, url, url_object_id, front_image_url, front_image_path, praise_nums, comment_nums, fav_nums, tags, content, create_date)
+            insert into jobbole_article(title, url, url_object_id, front_image_url, front_image_path, 
+            praise_nums, comment_nums, fav_nums, tags, content, create_date)
             values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE praise_nums=VALUES(praise_nums)
         """
         params = list()
@@ -48,6 +50,7 @@ class MysqlPipeline(object):
         self.conn.commit()
 
         return item
+
 
 class MysqlTwistedPipeline(object):
     def __init__(self, dbpool):
@@ -94,6 +97,7 @@ class JsonWithEncodingPipeline(object):
     def spider_closed(self, spider):
         self.file.close()
 
+
 class JsonExporterPipeline(object):
     def __init__(self):
         self.file = open("articleexport.json", "wb")
@@ -108,6 +112,7 @@ class JsonExporterPipeline(object):
         self.exporter.finish_exporting()
         self.file.close()
 
+
 class ArticleImagePipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         if "front_image_url" in item:
@@ -117,6 +122,7 @@ class ArticleImagePipeline(ImagesPipeline):
             item["front_image_path"] = image_file_path
 
         return item
+
 
 class ElasticsearchPipeline(object):
     # write data to es

@@ -3,14 +3,16 @@ import scrapy
 import json
 
 from scrapy.loader import ItemLoader
+from scrapy_redis.spiders import RedisSpider
 
 from ArticleSpider.items import TechcrunchItem
 
 
-class TechcrunchSpider(scrapy.Spider):
+class TechcrunchSpider(RedisSpider):
     name = 'techcrunch'
     allowed_domains = ['techcrunch.com']
-    start_urls = ['https://techcrunch.com/wp-json/tc/v1/magazine?page={}&_embed=true&cachePrevention=0']
+    redis_key = "techcrunch:start_urls"
+    # start_urls = ['https://techcrunch.com/wp-json/tc/v1/magazine?page={}&_embed=true&cachePrevention=0']
 
     def parse(self, response):
         # Parse tech news from the last 3 years

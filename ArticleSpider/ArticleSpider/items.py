@@ -8,23 +8,21 @@ import datetime
 import re
 
 import scrapy
-from scrapy.loader.processors import TakeFirst, Identity, MapCompose, Join
-from scrapy.loader import ItemLoader
-
 from ArticleSpider.models.es_types import CommonType
-from ArticleSpider.utils.common import extract_num, get_md5
-from ArticleSpider.settings import SQL_DATE_FORMAT, SQL_DATETIME_FORMAT
-
-from w3lib.html import remove_tags
-
+from ArticleSpider.settings import SQL_DATETIME_FORMAT
+from ArticleSpider.utils.common import get_md5
 from elasticsearch_dsl.connections import connections
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import TakeFirst
 
-es = connections.create_connection(CommonType._doc_type.using)
+es = connections.create_connection(CommonType._get_using)
+
 
 class ArticlespiderItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
 
 def date_convert(value):
     match_re = re.match(".*?(\d+.*)", value)
@@ -32,6 +30,7 @@ def date_convert(value):
         return match_re.group(1)
     else:
         return "1970-07-01"
+
 
 def gen_suggests(index, info_tuple, analyzer="standard"):
     # generate suggests based on input string
@@ -58,114 +57,6 @@ class ArticleItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
 
-class ZhihuQuestionItem(scrapy.Item):
-    zhihu_id = scrapy.Field()
-    topics = scrapy.Field()
-    url = scrapy.Field()
-    title = scrapy.Field()
-    content = scrapy.Field()
-    answer_num = scrapy.Field()
-    comments_num = scrapy.Field()
-    watch_user_num = scrapy.Field()
-    click_num = scrapy.Field()
-    crawl_time = scrapy.Field()
-
-    def get_insert_sql(self):
-        insert_sql = """
-            insert into zhihu_question(zhihu_id, topics, url, title, content, answer_num, comments_num,
-              watch_user_num, click_num, crawl_time
-              )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE content=VALUES(content), answer_num=VALUES(answer_num), comments_num=VALUES(comments_num),
-              watch_user_num=VALUES(watch_user_num), click_num=VALUES(click_num)
-        """
-
-        zhihu_id = "".join(self["zhihu_id"])
-        topics = ",".join(self["topics"])
-        url = "".join(self["url"])
-        title = "".join(self["title"])
-        content = "".join(self["content"])
-        answer_num = extract_num("".join(self["answer_num"]).replace(",", "")) if "," in "".join(
-            self["answer_num"]) else extract_num("".join(self["answer_num"]))
-        comments_num = extract_num("".join(self["comments_num"]).replace(",", "")) if "," in "".join(
-            self["comments_num"]) else extract_num("".join(self["comments_num"]))
-        crawl_time = datetime.datetime.now().strftime(SQL_DATETIME_FORMAT)
-
-        if len(self["watch_user_num"]) == 2:
-            watch_user_num = int(self["watch_user_num"][0].replace(",", ""))
-            click_num = int(self["watch_user_num"][1].replace(",", ""))
-        else:
-            watch_user_num = int(self["watch_user_num"][0].replace(",", ""))
-            click_num = 0
-
-        params = (zhihu_id, topics, url, title, content, answer_num,
-                  comments_num, watch_user_num, click_num, crawl_time)
-        return insert_sql, params
-
-    def save_to_es(self):
-        # from item to es
-        qa = CommonType()
-        qa.title = "".join(self["title"])
-        content = [remove_tags(content).strip() for content in self["content"]]
-        qa.content = " ".join(content)
-        qa.url = "".join(self["url"])
-        qa.meta.id = get_md5(qa.title)
-        qa.source = "Zhihu"
-
-        qa.suggest = gen_suggests(CommonType._doc_type.index, ((qa.title, 10), (qa.content, 6)), "ik_max_word")
-
-        qa.save()
-        return
-    
-
-class ZhihuAnswerItem(scrapy.Item):
-    zhihu_id = scrapy.Field()
-    url = scrapy.Field()
-    question_id = scrapy.Field()
-    question_title = scrapy.Field()
-    author_id = scrapy.Field()
-    content = scrapy.Field()
-    praise_num = scrapy.Field()
-    comments_num = scrapy.Field()
-    create_time = scrapy.Field()
-    update_time = scrapy.Field()
-    crawl_time = scrapy.Field()
-
-    def get_insert_sql(self):
-        insert_sql = """
-                    insert into zhihu_answer(zhihu_id, url, question_id, author_id, content, praise_num, comments_num,
-                      create_time, update_time, crawl_time
-                      ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                      ON DUPLICATE KEY UPDATE content=VALUES(content), comments_num=VALUES(comments_num), praise_num=VALUES(praise_num),
-                      update_time=VALUES(update_time)
-                """
-
-        create_time = datetime.datetime.fromtimestamp(self["create_time"]).strftime(SQL_DATETIME_FORMAT)
-        update_time = datetime.datetime.fromtimestamp(self["update_time"]).strftime(SQL_DATETIME_FORMAT)
-        crawl_time = datetime.datetime.now().strftime(SQL_DATETIME_FORMAT)
-        params = (
-            self["zhihu_id"], self["url"], self["question_id"],
-            self["author_id"], self["content"], self["praise_num"],
-            self["comments_num"], create_time, update_time, crawl_time
-        )
-
-        return insert_sql, params
-
-    def save_to_es(self):
-        # from item to es
-        qa = CommonType()
-        qa.title = self["question_title"]
-        qa.content = remove_tags(self["content"])
-        qa.url = self["url"]
-        qa.meta.id = get_md5(self["url"])
-        qa.source = "Zhihu"
-
-        qa.suggest = gen_suggests(CommonType._doc_type.index, ((qa.title, 10), (qa.content, 6)), "ik_max_word")
-
-        qa.save()
-        return
-
-
 def remove_dollar_sign(value):
     return value.replace("$", "").replace("₹", "")
 
@@ -176,7 +67,7 @@ def take_first_value(value):
 
 def handle_spaces(value):
     lst = value.split("\n")
-    clean_lst = [element.strip() for element in lst ]
+    clean_lst = [element.strip() for element in lst]
     return "".join(clean_lst)
 
 
@@ -288,7 +179,7 @@ class TechcrunchItem(scrapy.Item):
         news.meta.id = get_md5(self["title"])
         news.source = "TechCrunch"
 
-        news.suggest = gen_suggests(CommonType._doc_type.index, ((news.title, 10), (news.content, 6)))
+        news.suggest = gen_suggests(CommonType._get_index, ((news.title, 10), (news.content, 6)))
 
         news.save()
         return
