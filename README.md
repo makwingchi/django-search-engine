@@ -1,25 +1,30 @@
-# Library Search Engine
+# Django-based Search Engine
 
-## Description
-This is a web search engine project built mainly with Elasticsearch and the Django Framework. The data used was crawled from [Amazon](https://www.amazon.com), [TechCrunch](https://www.techcrunch.com), and [Zhihu](https://www.zhihu.com) (more than 100,000 rows in total), and stored in Elasticsearch database. 
 
-## Features
-- The search engine offers search suggestions before you've even finished typing;
-- Users are able to know popular search and their more recent search terms;
-- Users will be aware of the total number of results they get, the total number of pages, the amount of time the system takes to fetch those results, and the source each one of them come from;
-- Pagination divides the search results into discrete pages, allowing users to view 10 results in a single page.
+## Overview
+This is a web search engine project implemented with the Django MTV (Model-Template-View) Backend and Django Template Engine. The data used for the project
+was crawled from [Amazon](https://www.amazon.com) and [TechCrunch](https://www.techcrunch.com) (more than 100,000 rows in total) using Redis-based Scrapy, 
+and stored in an Elasticsearch database. 
 
-## Stack
-- `Python`
-- `Scrapy`
+
+## Tech Stack
 - `Django`
 - `Elasticsearch`
-- `Kibana`
+- `Scrapy`
 - `Redis`
+- `Kibana`
 - `Javascript`
 - `HTML/CSS`
 
-## Demo
+
+## Features
+- The search engine offers search suggestions before you've finished typing in a complete search term;
+- Users are able to know popular search and their more recent search terms;
+- Users will be aware of the total number of results they get, the total number of pages, the amount of time the system takes to fetch those results, and the source each one of them comes from;
+- Pagination divides the search results into discrete pages, allowing users to view certain number of results in a single page.
+
+
+## Preview
 Search Suggestions
 ![demo](/Demo/suggest.PNG)
 
