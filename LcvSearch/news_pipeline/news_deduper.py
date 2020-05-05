@@ -20,7 +20,7 @@ from models import CommonType
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://arzcmkvz:opl4ObOpTJiiv7sNr-96akzjm_zSbBjA@jellyfish.rmq.cloudamqp.com/arzcmkvz"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupe-news-task-queue"
 
-SLEEP_TIME_IN_SECONDS = 3 * 60
+SLEEP_TIME_IN_SECONDS = 30
 
 NEWS_TABLE_NAME = "news"
 
