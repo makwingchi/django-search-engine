@@ -26,18 +26,6 @@ class SearchSuggest(View):
         keywords = request.GET.get("s", "")
         re_datas = []
         if keywords:
-            # s = CommonType.search()
-            # s = s.suggest("my_suggest", keywords, completion={
-            #     "field": "title",
-            #     "fuzzy": {
-            #         "fuzziness": 2,
-            #     },
-            #     "size": 10
-            # })
-            # suggestions = s.execute_suggest()
-            # for match in suggestions.my_suggest[0].options:
-            #     source = match._source
-            #     re_datas.append(source["title"])
             response = client.search(
                 index="news",
                 body={
