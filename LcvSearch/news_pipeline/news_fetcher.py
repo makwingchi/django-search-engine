@@ -15,7 +15,7 @@ DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupe-news-task-queue"
 SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://ywcixiii:AQtEfYcJquJVjkZexYqTiJ95bP_898JP@crane.rmq.cloudamqp.com/ywcixiii"
 SCRAPE_NEWS_TASK_QUEUE_NAME = "scrape-news-task-queue"
 
-SLEEP_TIME_IN_SECONDS = 5
+SLEEP_TIME_IN_SECONDS = 5 * 60
 
 dedupe_news_queue_client = CloudAMQPClient(DEDUPE_NEWS_TASK_QUEUE_URL, DEDUPE_NEWS_TASK_QUEUE_NAME)
 scrape_news_queue_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NEWS_TASK_QUEUE_NAME)

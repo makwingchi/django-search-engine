@@ -15,7 +15,7 @@ REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24
-SLEEP_TIME_IN_SECONDS = 10
+SLEEP_TIME_IN_SECONDS = 5 * 60
 
 SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://ywcixiii:AQtEfYcJquJVjkZexYqTiJ95bP_898JP@crane.rmq.cloudamqp.com/ywcixiii"
 SCRAPE_NEWS_TASK_QUEUE_NAME = "scrape-news-task-queue"
