@@ -3,25 +3,43 @@
 
 ## Overview
 This is a web search engine project implemented with the Django MTV (Model-Template-View) Backend and Django Template Engine. The data used for the project
-was crawled from [Amazon](https://www.amazon.com) and [TechCrunch](https://www.techcrunch.com) (more than 100,000 rows in total) using Redis-based Scrapy, 
+is dynamically scraped from CNN, BBC, Bloomberg, ESPN, and some other mainstream media using the data pipeline built with Python, RabbitMQ & Redis, 
 and stored in an Elasticsearch database. 
+
+
+## Local Installation
+Please make sure you have `Python 3`, `Django`, `Elasticsearch`, `Redis`, and `Git` installed in your local machine.
+
+<b>Clone the repository to your local machine</b><br>
+```git clone https://github.com/makwingchi/django-search-engine```<br><br>
+
+<b>Run Redis via command line</b> <br>
+```>redis-cli``` <br><br>
+
+<b>Start a Elasticsearch server</b><br>
+```>cd elasticsearch-x.y.z\bin``` <br>
+```>elasticsearch.bat``` <br><br>
+
+<b>Run the data pipeline to fetch news data</b><br>
+```>cd LcvSearch/news_pipeline```<br>
+```>python news_monitor.py```<br>
+```>python news_fetcher.py```<br>
+```>python news_deduper.py```<br><br>
+
+<b>Start the Django Server</b><br>
+```>cd LcvSearch```<br>
+```>python manage.py runserver```<br><br>
 
 
 ## Tech Stack
 - `Django`
+- `Django Template`
 - `Elasticsearch`
-- `Scrapy`
+- `RabbitMQ`
 - `Redis`
-- `Kibana`
+- `scikit-learn`
 - `Javascript`
 - `HTML/CSS`
-
-
-## Features
-- The search engine offers search suggestions before you've finished typing in a complete search term;
-- Users are able to know popular search and their more recent search terms;
-- Users will be aware of the total number of results they get, the total number of pages, the amount of time the system takes to fetch those results, and the source each one of them comes from;
-- Pagination divides the search results into discrete pages, allowing users to view certain number of results in a single page.
 
 
 ## Preview
@@ -39,3 +57,9 @@ Result page
 
 Pagination
 ![demo](/Demo/pagination.PNG)
+
+## TODO
+- [ ] Implement distributed scrapers to improve crawling speed
+- [ ] Apply a more deliberate NLP approach to identify similar news
+- [ ] Use the search engine as a platform for advertising (add user login, user click log processor, and recommender system features)
+- [ ] ...
