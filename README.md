@@ -11,24 +11,24 @@ and stored in an Elasticsearch database.
 Please make sure you have `Python 3`, `Django`, `Elasticsearch`, `Redis`, and `Git` installed in your local machine.
 
 <b>Clone the repository to your local machine</b><br>
-```git clone https://github.com/makwingchi/django-search-engine```<br><br>
+```git clone https://github.com/makwingchi/django-search-engine```<br>
 
 <b>Run Redis via command line</b> <br>
-```>redis-cli``` <br><br>
+```>redis-cli``` <br>
 
 <b>Start a Elasticsearch server</b><br>
 ```>cd elasticsearch-x.y.z\bin``` <br>
-```>elasticsearch.bat``` <br><br>
+```>elasticsearch.bat``` <br>
 
 <b>Run the data pipeline to fetch news data</b><br>
 ```>cd LcvSearch/news_pipeline```<br>
 ```>python news_monitor.py```<br>
 ```>python news_fetcher.py```<br>
-```>python news_deduper.py```<br><br>
+```>python news_deduper.py```<br>
 
 <b>Start the Django Server</b><br>
 ```>cd LcvSearch```<br>
-```>python manage.py runserver```<br><br>
+```>python manage.py runserver```<br>
 
 
 ## Tech Stack
